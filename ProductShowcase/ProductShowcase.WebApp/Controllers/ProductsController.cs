@@ -77,6 +77,7 @@ namespace ProductShowcase.WebApp.Controllers
                 }
                 _context.Add(product);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Product created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CategoryId"] = new SelectList(_context.Categories.Where(c => !c.IsDeleted), "Id", "Name", product.CategoryId);
@@ -142,11 +143,13 @@ namespace ProductShowcase.WebApp.Controllers
 
                     _context.Update(existingProduct);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Product updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ProductExists(product.Id))
                     {
+                        TempData["ErrorMessage"] = "Product not found!";
                         return NotFound();
                     }
                     else
@@ -156,6 +159,7 @@ namespace ProductShowcase.WebApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            TempData["ErrorMessage"] = "Failed to update product. Please check your input.";
             ViewData["CategoryId"] = new SelectList(_context.Categories.Where(c => !c.IsDeleted), "Id", "Name", product.CategoryId);
             return View(product);
         }
@@ -190,6 +194,11 @@ namespace ProductShowcase.WebApp.Controllers
                 product.IsDeleted = true;
                 _context.Update(product);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Product deleted successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Product not found!";
             }
             return RedirectToAction(nameof(Index));
         }

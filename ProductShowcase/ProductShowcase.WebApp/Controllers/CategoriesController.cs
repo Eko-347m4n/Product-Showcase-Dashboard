@@ -36,8 +36,10 @@ namespace ProductShowcase.WebApp.Controllers
             {
                 _context.Add(category);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Category created successfully!";
                 return RedirectToAction(nameof(Index));
             }
+            TempData["ErrorMessage"] = "Failed to create category. Please check your input.";
             return View(category);
         }
 
@@ -79,11 +81,13 @@ namespace ProductShowcase.WebApp.Controllers
                     existingCategory.Name = category.Name;
                     _context.Update(existingCategory);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Category updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!CategoryExists(category.Id))
                     {
+                        TempData["ErrorMessage"] = "Category not found!";
                         return NotFound();
                     }
                     else
@@ -93,6 +97,7 @@ namespace ProductShowcase.WebApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            TempData["ErrorMessage"] = "Failed to update category. Please check your input.";
             return View(category);
         }
 
@@ -125,6 +130,11 @@ namespace ProductShowcase.WebApp.Controllers
                 category.IsDeleted = true;
                 _context.Update(category);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Category deleted successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Category not found!";
             }
             return RedirectToAction(nameof(Index));
         }
