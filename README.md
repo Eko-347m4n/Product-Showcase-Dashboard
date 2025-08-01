@@ -17,7 +17,7 @@ This is a .NET Core web application for showcasing products.
 
 1. Clone the repository:
    ```bash
-   git clone <repository_url>
+   git clone <https://github.com/Eko-347m4n/Product-Showcase-Dashboard.git>
    cd "Product Showcase Dashboard"
    ```
 2. Restore NuGet packages:
