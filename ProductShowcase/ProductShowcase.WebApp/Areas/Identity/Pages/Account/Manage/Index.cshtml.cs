@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,54 +15,34 @@ namespace ProductShowcase.WebApp.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IWebHostEnvironment webHostEnvironment)
+            SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _webHostEnvironment = webHostEnvironment;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string Username { get; set; }
-        public ApplicationUser User { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            [Display(Name = "Full Name")]
-            public string FullName { get; set; }
-
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
 
-            [Display(Name = "Profile Picture")]
-            public IFormFile ProfilePictureFile { get; set; }
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
+
+            [Display(Name = "Profile Picture URL")]
+            public string ProfilePictureUrl { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -76,8 +54,9 @@ namespace ProductShowcase.WebApp.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
+                PhoneNumber = phoneNumber,
                 FullName = user.FullName,
-                PhoneNumber = phoneNumber
+                ProfilePictureUrl = user.ProfilePictureUrl
             };
         }
 
@@ -88,7 +67,7 @@ namespace ProductShowcase.WebApp.Areas.Identity.Pages.Account.Manage
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
-            this.User = user;
+
             await LoadAsync(user);
             return Page();
         }
@@ -107,33 +86,6 @@ namespace ProductShowcase.WebApp.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            // Update FullName
-            if (Input.FullName != user.FullName)
-            {
-                user.FullName = Input.FullName;
-                await _userManager.UpdateAsync(user);
-            }
-
-            // Update Profile Picture
-            if (Input.ProfilePictureFile != null)
-            {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profile_pictures");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Input.ProfilePictureFile.FileName;
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await Input.ProfilePictureFile.CopyToAsync(fileStream);
-                }
-                user.ProfilePictureUrl = "/images/profile_pictures/" + uniqueFileName;
-                await _userManager.UpdateAsync(user);
-            }
-
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
@@ -144,6 +96,18 @@ namespace ProductShowcase.WebApp.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
+
+            if (Input.FullName != user.FullName)
+            {
+                user.FullName = Input.FullName;
+            }
+
+            if (Input.ProfilePictureUrl != user.ProfilePictureUrl)
+            {
+                user.ProfilePictureUrl = Input.ProfilePictureUrl;
+            }
+
+            await _userManager.UpdateAsync(user);
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

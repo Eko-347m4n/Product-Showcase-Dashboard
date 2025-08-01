@@ -1,21 +1,10 @@
-@if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+@model string
+
+@if (!String.IsNullOrEmpty(Model))
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
+    var statusMessageClass = Model.StartsWith("Error") ? "danger" : "success";
+    <div class="alert alert-@statusMessageClass alert-dismissible" role="alert">
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (!string.IsNullOrEmpty(TempData["WarningMessage"] as string))
-{
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        @TempData["WarningMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        @Model
     </div>
 }
